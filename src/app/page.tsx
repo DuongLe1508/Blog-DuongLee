@@ -1,70 +1,57 @@
-import { getPosts, getSearchPosts, getNavigation } from "./ghost-client"
-import Card from './Card';
+import { getPosts, getSearchPosts, getNavigation } from "./ghost-client";
+import Card from "./Card";
 import Pagination from "./Pagination";
-import * as fs from 'node:fs';
-import type { Metadata } from 'next';
-import { notFound } from 'next/navigation';
+import * as fs from "node:fs";
+import type { Metadata } from "next";
+import { notFound } from "next/navigation";
 import type { PostsOrPages } from "@tryghost/content-api";
 
-export async function generateMetadata(): Promise<Metadata> {
-
-  const Metadata = await getNavigation()
+export async function generateMetadata(): Promise<any> {
+  const Metadata = await getNavigation();
 
   if (Metadata) {
     return {
       title: Metadata.title,
       description: Metadata.description,
-      keywords: ['Next.js', 'React', 'JavaScript'],
-    }
+      keywords: ["Next.js", "React", "JavaScript"],
+    };
   }
-
 }
 
 export default async function Home() {
-
-  const getPost: PostsOrPages = await getPosts()
+  const getPost: PostsOrPages = await getPosts();
 
   if (getPost.length === 0) {
-
-    notFound()
-
+    notFound();
   }
 
-  const AllPostForSerach = await getSearchPosts()
+  const AllPostForSerach = await getSearchPosts();
 
-  // Enable getSearch  
+  // Enable getSearch
 
   try {
+    const jsonString = JSON.stringify(AllPostForSerach);
 
-    const jsonString = JSON.stringify(AllPostForSerach)
-
-    fs.writeFile('search.json', jsonString, 'utf8', err => {
+    fs.writeFile("search.json", jsonString, "utf8", (err) => {
       if (err) {
-        console.log('Error writing file', err)
+        console.log("Error writing file", err);
       } else {
-        console.log('Successfully wrote file')
+        console.log("Successfully wrote file");
       }
-    })
-
+    });
   } catch (error) {
-    console.log('error : ', error)
+    console.log("error : ", error);
   }
-
 
   return (
     <>
-      <main className="container my-12 mx-auto grid grid-cols-1 gap-2 md:gap-3 lg:gap-4 lg:grid-cols-3 md:grid-cols-2 xl:grid-cols-4 2xl:grid-cols-4">
-
-        {
-          getPost?.map(
-            item => {
-              return <Card key={item.uuid} item={item} />
-            })
-        }
-
+      <main className="container grid grid-cols-1 gap-2 mx-auto my-12 md:gap-3 lg:gap-4 lg:grid-cols-3 md:grid-cols-2 xl:grid-cols-4 2xl:grid-cols-4">
+        {getPost?.map((item) => {
+          return <Card key={item.uuid} item={item} />;
+        })}
       </main>
 
       <Pagination item={getPost.meta.pagination} />
     </>
-  )
+  );
 }
